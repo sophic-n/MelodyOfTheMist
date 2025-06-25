@@ -32,7 +32,8 @@ Transform:
   m_LocalPosition: {x: 0.935, y: -0.526, z: 90.52393}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 3864787452440268149}
   m_Father: {fileID: 7547957357938457075}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &8247851088489215809
@@ -215,7 +216,6 @@ Transform:
   m_LocalScale: {x: 100, y: 100, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 7518224967455576135}
   - {fileID: 4138494836045037023}
   - {fileID: 1342346837565101679}
   m_Father: {fileID: 0}
@@ -236,7 +236,7 @@ MonoBehaviour:
   promptUI: {fileID: 5629896923473671102}
   playerTarget: {fileID: 0}
   moveSpeed: 20
---- !u!1 &8796024138452010298
+--- !u!1 &8293727004879077090
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -244,8 +244,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 7518224967455576135}
-  - component: {fileID: 4199197372037911013}
+  - component: {fileID: 3864787452440268149}
   m_Layer: 0
   m_Name: PromptAnchor
   m_TagString: Untagged
@@ -253,33 +252,21 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &7518224967455576135
-RectTransform:
+--- !u!4 &3864787452440268149
+Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8796024138452010298}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 0}
+  m_GameObject: {fileID: 8293727004879077090}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.017, y: 0.728, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 7547957357938457075}
+  m_Father: {fileID: 4138494836045037023}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.933, y: 0.209}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &4199197372037911013
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8796024138452010298}
-  m_CullTransparentMesh: 1
 --- !u!1001 &8574358065314667015
 PrefabInstance:
   m_ObjectHideFlags: 0

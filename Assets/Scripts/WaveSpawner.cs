@@ -27,57 +27,57 @@ public class WaveSpawner : MonoBehaviour
     }
 
     IEnumerator SpawnNextWave()
-{
-    yield return new WaitForSeconds(timeBetweenWaves);
-
-    currentWave++;
-
-    if (currentWave > totalWaves)
     {
-        Debug.Log("[WaveSpawner] All waves completed!");
-        yield break;
+        yield return new WaitForSeconds(timeBetweenWaves);
+
+        currentWave++;
+
+        if (currentWave > totalWaves)
+        {
+            Debug.Log("[WaveSpawner] All waves completed!");
+            yield break;
+        }
+
+        Debug.Log($"[WaveSpawner] Spawning Wave {currentWave}");
+
+        int enemiesThisWave = 3 + currentWave * 2;
+
+        List<Enemy.Difficulty> waveDifficulties = new List<Enemy.Difficulty>();
+        for (int i = 0; i < enemiesThisWave; i++)
+        {
+            waveDifficulties.Add(GetEnemyDifficultyForWave(currentWave));
+        }
+
+        StartCoroutine(SpawnEnemiesWithDelay(waveDifficulties));
     }
 
-    Debug.Log($"[WaveSpawner] Spawning Wave {currentWave}");
-
-    int enemiesThisWave = 3 + currentWave * 2;
-
-    List<Enemy.Difficulty> waveDifficulties = new List<Enemy.Difficulty>();
-    for (int i = 0; i < enemiesThisWave; i++)
+    IEnumerator SpawnEnemiesWithDelay(List<Enemy.Difficulty> waveDifficulties)
     {
-        waveDifficulties.Add(GetEnemyDifficultyForWave(currentWave));
+        foreach (var difficulty in waveDifficulties)
+        {
+            SpawnEnemy(difficulty);
+            yield return new WaitForSeconds(1.5f); //  Adjust spawn delay 
+        }
+
+        StartCoroutine(CheckForWaveClear());
     }
-
-    StartCoroutine(SpawnEnemiesWithDelay(waveDifficulties));
-}
-
-IEnumerator SpawnEnemiesWithDelay(List<Enemy.Difficulty> waveDifficulties)
-{
-    foreach (var difficulty in waveDifficulties)
-    {
-        SpawnEnemy(difficulty);
-        yield return new WaitForSeconds(1.5f); //  Adjust spawn delay 
-    }
-
-    StartCoroutine(CheckForWaveClear());
-}
 
 
     void SpawnEnemy(Enemy.Difficulty difficulty)
-{
-    GameObject prefab = GetPrefabForDifficulty(difficulty);
-    Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
+    {
+        GameObject prefab = GetPrefabForDifficulty(difficulty);
+        Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
 
-    GameObject enemyGO = Instantiate(prefab, spawnPoint.position, Quaternion.identity);
-    Enemy enemy = enemyGO.GetComponent<Enemy>();
-    enemy.playerTarget = playerTarget;
+        GameObject enemyGO = Instantiate(prefab, spawnPoint.position, Quaternion.identity);
+        Enemy enemy = enemyGO.GetComponent<Enemy>();
+        enemy.playerTarget = playerTarget;
 
-    activeEnemies.Add(enemyGO);
-    gameStateManager?.RegisterEnemy();
+        activeEnemies.Add(enemyGO);
+        gameStateManager?.RegisterEnemy();
 
-    // 🔊 Play enemy spawn sound
-    AudioManager.Instance.PlayRandomSFX(AudioManager.Instance.enemySpawns, "enemySpawn");
-}
+        // 🔊 Play enemy spawn sound
+        AudioManager.Instance.PlayRandomSFX(AudioManager.Instance.enemySpawns, "enemySpawn");
+    }
 
     Enemy.Difficulty GetEnemyDifficultyForWave(int wave)
     {
@@ -95,31 +95,65 @@ IEnumerator SpawnEnemiesWithDelay(List<Enemy.Difficulty> waveDifficulties)
     }
 
     GameObject GetPrefabForDifficulty(Enemy.Difficulty difficulty)
-{
-    switch (difficulty)
     {
-        case Enemy.Difficulty.Low:
-            return lowEnemyPrefabs[Random.Range(0, lowEnemyPrefabs.Length)];
-        case Enemy.Difficulty.Medium:
-            return mediumEnemyPrefabs[Random.Range(0, mediumEnemyPrefabs.Length)];
-        case Enemy.Difficulty.High:
-            return highEnemyPrefabs[Random.Range(0, highEnemyPrefabs.Length)];
-        case Enemy.Difficulty.VeryHigh:
-            return veryHighEnemyPrefabs[Random.Range(0, veryHighEnemyPrefabs.Length)];
-        default:
-            return lowEnemyPrefabs[0];
+        switch (difficulty)
+        {
+            case Enemy.Difficulty.Low:
+                return lowEnemyPrefabs[Random.Range(0, lowEnemyPrefabs.Length)];
+            case Enemy.Difficulty.Medium:
+                return mediumEnemyPrefabs[Random.Range(0, mediumEnemyPrefabs.Length)];
+            case Enemy.Difficulty.High:
+                return highEnemyPrefabs[Random.Range(0, highEnemyPrefabs.Length)];
+            case Enemy.Difficulty.VeryHigh:
+                return veryHighEnemyPrefabs[Random.Range(0, veryHighEnemyPrefabs.Length)];
+            default:
+                return lowEnemyPrefabs[0];
+        }
     }
-}
 
     IEnumerator CheckForWaveClear()
+{
+    var inputManager = FindObjectOfType<PlayerInputManager>();
+
+    while (activeEnemies.Count > 0)
     {
-        while (activeEnemies.Count > 0)
+        // Remove null enemies and unregister them
+        for (int i = activeEnemies.Count - 1; i >= 0; i--)
         {
-            activeEnemies.RemoveAll(e => e == null);
-            yield return new WaitForSeconds(1f);
+            if (activeEnemies[i] == null)
+            {
+                if (inputManager != null)
+                {
+                    inputManager.UnregisterEnemy(null); // null-safe call
+                }
+
+                activeEnemies.RemoveAt(i);
+            }
         }
 
-        Debug.Log($"[WaveSpawner] Wave {currentWave} cleared!");
-        StartCoroutine(SpawnNextWave());
+        yield return new WaitForSeconds(1f);
     }
+
+    Debug.Log($"[WaveSpawner] Wave {currentWave} cleared!");
+    StartCoroutine(SpawnNextWave());
+}
+
+    
+    public void ForceNextWave()
+{
+    Debug.Log("[WaveSpawner] Force skipping to next wave.");
+
+    // Destroy all active enemies immediately
+    foreach (var enemy in activeEnemies)
+    {
+        if (enemy != null)
+            Destroy(enemy);
+    }
+
+    activeEnemies.Clear();
+
+    StopAllCoroutines(); // Stop any pending wave checks/spawns
+
+    StartCoroutine(SpawnNextWave());
+}
 }

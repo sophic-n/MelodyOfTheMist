@@ -2,8 +2,13 @@ using UnityEngine;
 
 public class GameStateManager : MonoBehaviour
 {
-    public GameObject winPanel; // Assign in Inspector
+    public GameObject winPanel;
     private int activeEnemies = 0;
+
+    [Header("Debug")]
+    public bool debugMode = false;
+
+    public WaveSpawner enemySpawner; // <-- Assign your spawner in Inspector
 
     public void RegisterEnemy()
     {
@@ -18,6 +23,34 @@ public class GameStateManager : MonoBehaviour
             Win();
         }
     }
+    void Update()
+    {
+        if (!debugMode) return;
+
+        // Skip to next wave with 'N'
+        if (Input.GetKeyDown(KeyCode.N))
+        {
+            Debug.Log("[Debug] Skipping to next wave via 'N' key.");
+
+            if (enemySpawner != null)
+            {
+                enemySpawner.ForceNextWave();
+                activeEnemies = 0; // Optional: reset counter
+            }
+            else
+            {
+                Debug.LogWarning("[GameStateManager] No EnemySpawner assigned for next wave!");
+            }
+        }
+
+        // Force win screen with 'W'
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            Debug.Log("[Debug] Forcing Win Screen via 'W' key.");
+            Win();
+        }
+    }
+
 
     void Win()
     {
@@ -30,16 +63,10 @@ public class GameStateManager : MonoBehaviour
         var input = FindObjectOfType<PlayerInputManager>();
         if (input != null) input.enabled = false;
 
-        //  Play win music
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.StopMusic();
             AudioManager.Instance.PlayMusic(AudioManager.Instance.gameWinMusic);
         }
-
-        // Optional: Play a one-shot victory SFX
-        // AudioManager.Instance.PlayRandomSFX(AudioManager.Instance.victorySFX, "victory");
     }
 }
-
-

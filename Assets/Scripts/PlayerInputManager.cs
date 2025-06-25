@@ -32,6 +32,9 @@ public class PlayerInputManager : MonoBehaviour
 
     private void OnNoteInput(InputAction.CallbackContext context)
     {
+        // Clean out any destroyed/null enemies
+        activeEnemies.RemoveAll(e => e == null);
+
         if (context.control is KeyControl keyControl)
         {
             try
@@ -83,11 +86,11 @@ public class PlayerInputManager : MonoBehaviour
     }
 
     public void SetCurrentTarget(Enemy enemy)
-    {
-        if (enemy == currentTarget) return;
+{
+    if (enemy == null || enemy == currentTarget) return;
 
-        currentTarget?.promptUI.Highlight(false);
-        currentTarget = enemy;
-        currentTarget?.promptUI.Highlight(true);
-    }
+    currentTarget?.promptUI.Highlight(false);
+    currentTarget = enemy;
+    currentTarget?.promptUI.Highlight(true);
+}
 }

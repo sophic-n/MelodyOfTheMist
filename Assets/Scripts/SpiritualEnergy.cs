@@ -6,13 +6,15 @@ public class SpiritualEnergy : MonoBehaviour
     public int maxEnergy = 5;
     public int currentEnergy;
 
-    public Image[] energyIcons; // Optional: assign sprite icons in the Inspector
+    public Image[] energyIcons;
     public Sprite fullIcon;
     public Sprite emptyIcon;
 
-    public GameObject gameOverPanel; // Assign in Inspector
-    public PlayerFluteController playerFluteController; // Drag your player here in Inspector
+    public GameObject gameOverPanel;
+    public PlayerFluteController playerFluteController;
 
+    [Header("Debug")]
+    public bool godMode = false; // ✅ Toggle this in Inspector
 
     void Start()
     {
@@ -22,11 +24,16 @@ public class SpiritualEnergy : MonoBehaviour
 
     public void LoseEnergy(int amount = 1)
     {
+        if (godMode)
+        {
+            Debug.Log("[SpiritualEnergy] God mode ON – no energy lost.");
+            return;
+        }
+
         currentEnergy -= amount;
         currentEnergy = Mathf.Clamp(currentEnergy, 0, maxEnergy);
         UpdateUI();
 
-        // 🔊 Play energy lost sound
         AudioManager.Instance?.PlayRandomSFX(AudioManager.Instance.energyHit, "energyHit");
 
         if (currentEnergy <= 0)
@@ -41,32 +48,26 @@ public class SpiritualEnergy : MonoBehaviour
 
         for (int i = 0; i < energyIcons.Length; i++)
         {
-            if (i < currentEnergy)
-                energyIcons[i].sprite = fullIcon;
-            else
-                energyIcons[i].sprite = emptyIcon;
+            energyIcons[i].sprite = i < currentEnergy ? fullIcon : emptyIcon;
         }
     }
 
     void GameOver()
-{
-    Debug.Log("Game Over!");
-    Time.timeScale = 0f;
+    {
+        Debug.Log("Game Over!");
+        Time.timeScale = 0f;
 
-    if (gameOverPanel != null)
-        gameOverPanel.SetActive(true);
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(true);
 
-    var input = FindObjectOfType<PlayerInputManager>();
-    if (input != null) input.enabled = false;
+        var input = FindObjectOfType<PlayerInputManager>();
+        if (input != null) input.enabled = false;
 
-    // 🔊 Optional: stop background music and play game over music
-    AudioManager.Instance?.StopMusic();
-    AudioManager.Instance?.PlayMusic(AudioManager.Instance.gameOverMusic);
+        AudioManager.Instance?.StopMusic();
+        AudioManager.Instance?.PlayMusic(AudioManager.Instance.gameOverMusic);
 
-    // 🎭 Trigger player defeat animation
-    playerFluteController?.PlayDefeatAnimation();
-}
-
+        playerFluteController?.PlayDefeatAnimation();
+    }
 
     public void GainEnergy(int amount = 1)
     {
